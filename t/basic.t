@@ -18,6 +18,8 @@ use Lexical::Multi::Sub;
 
         like exception { foo 2, 3, 4 }, qr/no variant/;
 
+        ok !__PACKAGE__->can('foo');
+
         \&foo;
     };
 
