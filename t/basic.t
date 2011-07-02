@@ -9,7 +9,7 @@ use Lexical::Multi::Sub;
     my $foo = do {
         multi foo ($x, $y) { $x ** $y }
         # FIXME: this should work without parens
-        multi foo ($x) { foo($x, $x) }
+        multi foo ($x) { foo $x, $x }
 
         is exception {
             is foo(2, 4), 16;

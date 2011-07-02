@@ -172,7 +172,7 @@ S_parse_keyword_multi (pTHX_ OP **op_ptr)
     lex_stuff_pvs("BEGIN{"
                   "Lexical::Multi::Sub::_register sub {"
                   "BEGIN{B::Hooks::EndOfScope::on_scope_end{"
-                  "Lexical::Multi::Sub::_stuff(\"};\");"
+                  "Lexical::Multi::Sub::_finish(\"};\");"
                   "}}",
                   0);
     lex_stuff_pvs(";", 0);
@@ -181,6 +181,9 @@ S_parse_keyword_multi (pTHX_ OP **op_ptr)
     lex_stuff_pvs("BEGIN{"
                   "Lexical::Multi::Sub::_declare '",
                   0);
+    lex_stuff_pvs(";", 0);
+    lex_stuff_sv(namesv, 0);
+    lex_stuff_pvs("sub ", 0);
     lex_stuff_pvs(";", 0);
 
     *op_ptr = newOP(OP_NULL, 0);
@@ -211,6 +214,11 @@ BOOT:
     PL_keyword_plugin = multi_keyword_plugin;
 
 void
-_stuff (SV *sv)
+_finish (SV *sv)
+    PREINIT:
+        HE *name;
     CODE:
+        name = hv_fetch_ent(GvHV(PL_hintgv), hintkey_sv_compiling_name, 0,
+			    SvSHARED_HASH(hintkey_sv_compiling_name));
+        hv_delete_ent(PL_curstash, HeVAL(name), 0, 0);
         lex_stuff_sv(sv, 0);
