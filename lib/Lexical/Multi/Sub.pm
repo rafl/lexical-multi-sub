@@ -23,6 +23,10 @@ sub import {
     $^H{"Lexical::Multi::Sub/multi"} = 1;
 }
 
+# Much of the following code is incomplete and horrible. That's because many
+# parts were nicked from MooseX::Method::Signatures, because I didn't feel like
+# writing them again in a clearer way.
+
 sub _analyse_sig {
     my ($sig) = @_;
 
