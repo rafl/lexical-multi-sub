@@ -12,50 +12,50 @@ static SV *hintkey_sv_compiling_sig;
 static int
 S_keyword_active (pTHX_ SV *hintkey_sv)
 {
-	HE *he;
+    HE *he;
 
-	if(!GvHV(PL_hintgv))
+    if(!GvHV(PL_hintgv))
         return 0;
 
-	he = hv_fetch_ent(GvHV(PL_hintgv), hintkey_sv, 0,
+    he = hv_fetch_ent(GvHV(PL_hintgv), hintkey_sv, 0,
                       SvSHARED_HASH(hintkey_sv));
 
-	return he && SvTRUE(HeVAL(he));
+    return he && SvTRUE(HeVAL(he));
 }
 
 #define parse_idword(prefix) S_parse_idword(aTHX_ prefix)
 static SV *
 S_parse_idword (pTHX_ char const *prefix)
 {
-	STRLEN prefixlen, idlen;
-	SV *sv;
-	char *start, *s, c;
+    STRLEN prefixlen, idlen;
+    SV *sv;
+    char *start, *s, c;
 
-	s = start = PL_parser->bufptr;
-	c = *s;
+    s = start = PL_parser->bufptr;
+    c = *s;
 
-	if(!isIDFIRST(c)) {
+    if(!isIDFIRST(c)) {
         if (c == '(')
             croak("Anonymous multis not allowed");
 
         croak("syntax error");
     }
 
-	do {
-		c = *++s;
-	} while (isALNUM(c));
+    do {
+        c = *++s;
+    } while (isALNUM(c));
 
-	lex_read_to(s);
-	prefixlen = strlen(prefix);
-	idlen = s - start;
-	sv = newSV(prefixlen + idlen);
-	Copy(prefix, SvPVX(sv), prefixlen, char);
-	Copy(start, SvPVX(sv) + prefixlen, idlen, char);
-	SvPVX(sv)[prefixlen + idlen] = 0;
-	SvCUR_set(sv, prefixlen + idlen);
-	SvPOK_on(sv);
+    lex_read_to(s);
+    prefixlen = strlen(prefix);
+    idlen = s - start;
+    sv = newSV(prefixlen + idlen);
+    Copy(prefix, SvPVX(sv), prefixlen, char);
+    Copy(start, SvPVX(sv) + prefixlen, idlen, char);
+    SvPVX(sv)[prefixlen + idlen] = 0;
+    SvCUR_set(sv, prefixlen + idlen);
+    SvPOK_on(sv);
 
-	return sv;
+    return sv;
 }
 
 #define parse_signature() S_parse_signature(aTHX)
@@ -204,11 +204,11 @@ multi_keyword_plugin (pTHX_ char *keyword_ptr, STRLEN keyword_len, OP **op_ptr)
 MODULE = Lexical::Multi::Sub  PACKAGE = Lexical::Multi::Sub
 
 BOOT:
-	hintkey_sv_multi = newSVpvs_share("Lexical::Multi::Sub/multi");
-	hintkey_sv_compiling_name = newSVpvs_share("Lexical::Multi::Sub/compiling_name");
-	hintkey_sv_compiling_sig = newSVpvs_share("Lexical::Multi::Sub/compiling_sig");
+    hintkey_sv_multi = newSVpvs_share("Lexical::Multi::Sub/multi");
+    hintkey_sv_compiling_name = newSVpvs_share("Lexical::Multi::Sub/compiling_name");
+    hintkey_sv_compiling_sig = newSVpvs_share("Lexical::Multi::Sub/compiling_sig");
     next_keyword_plugin = PL_keyword_plugin;
-	PL_keyword_plugin = multi_keyword_plugin;
+    PL_keyword_plugin = multi_keyword_plugin;
 
 void
 _stuff (SV *sv)

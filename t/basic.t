@@ -36,7 +36,6 @@ use Lexical::Multi::Sub;
     multi bar (Num $x) { bar int $x }
     multi bar (Int $x) { $x * 2 }
 
-
     is bar(2.0), 4;
     is bar(2.2), 4;
 }

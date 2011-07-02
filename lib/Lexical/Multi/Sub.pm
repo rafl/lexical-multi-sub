@@ -90,9 +90,7 @@ sub _sig_type_constraint {
         }
     }
 
-    return Tuple[
-        map { $_->{tc} } @positional,
-    ];
+    return Tuple[ map { $_->{tc} } @positional ];
 }
 
 sub _register {
