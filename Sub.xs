@@ -34,7 +34,13 @@ S_parse_idword (pTHX_ char const *prefix)
 	s = start = PL_parser->bufptr;
 	c = *s;
 
-	if(!isIDFIRST(c)) croak("syntax error");
+	if(!isIDFIRST(c)) {
+        if (c == '(')
+            croak("Anonymous multis not allowed");
+
+        croak("syntax error");
+    }
+
 	do {
 		c = *++s;
 	} while (isALNUM(c));
@@ -42,7 +48,7 @@ S_parse_idword (pTHX_ char const *prefix)
 	lex_read_to(s);
 	prefixlen = strlen(prefix);
 	idlen = s - start;
-	sv = sv_2mortal(newSV(prefixlen + idlen));
+	sv = newSV(prefixlen + idlen);
 	Copy(prefix, SvPVX(sv), prefixlen, char);
 	Copy(start, SvPVX(sv) + prefixlen, idlen, char);
 	SvPVX(sv)[prefixlen + idlen] = 0;
@@ -72,7 +78,7 @@ S_parse_signature (pTHX)
 
     lex_read_to(s + 1);
 
-    sv = sv_2mortal(newSVpvn(start, s - start));
+    sv = newSVpvn(start, s - start);
 
     return sv;
 }
@@ -97,6 +103,7 @@ S_analyse_signature (pTHX_ SV *sv)
     if (count != 1)
         croak("uh oh");
 
+    SPAGAIN;
     ret = SvREFCNT_inc(POPs);
 
     PUTBACK;
@@ -126,6 +133,7 @@ S_injectable_code(pTHX_ SV *sig)
     if (count != 1)
         croak("uh oh");
 
+    SPAGAIN;
     ret = SvREFCNT_inc(POPs);
 
     PUTBACK;
@@ -168,8 +176,11 @@ S_parse_keyword_multi (pTHX_ OP **op_ptr)
                   "}}",
                   0);
     lex_stuff_pvs(";", 0);
+    lex_stuff_pvs("'}", 0);
     lex_stuff_sv(namesv, 0);
-    lex_stuff_pvs("sub ", 0);
+    lex_stuff_pvs("BEGIN{"
+                  "Lexical::Multi::Sub::_declare '",
+                  0);
     lex_stuff_pvs(";", 0);
 
     *op_ptr = newOP(OP_NULL, 0);

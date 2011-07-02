@@ -101,25 +101,27 @@ sub _register {
         "Lexical::Multi::Sub/compiling_${_}" } qw(name sig)
     };
 
-    if (my $variant_table = $^H{"Lexical::Multi::Sub/&${name}"}) {
-        $variant_table->add_variant(_sig_type_constraint($sig), $cv);
-        return;
-    }
+    my $variant_table = $^H{"Lexical::Multi::Sub/&${name}"};
+    $variant_table->add_variant(_sig_type_constraint($sig), [$sig, $cv]);
+}
+
+sub _declare {
+    my ($name, $sig) = @_;
+
+    return if $^H{"Lexical::Multi::Sub/&${name}"};
 
     my $variant_table = VariantTable->new(
         ambigious_match_callback => sub {
             my ($self, $value, @matches) = @_;
             local $Carp::CarpLevel = 2;
             croak sprintf 'Ambiguous match for multi method %s: %s with value %s',
-                $matches[0]->{value}->name,
-                join(q{, }, map { $_->{value}->signature } @matches),
+                $name,
+                join(q{, }, map { $_->{value}->[0]->to_string } @matches),
                 dump($value);
         },
     );
 
     $^H{"Lexical::Multi::Sub/&${name}"} = $variant_table;
-
-    $variant_table->add_variant(_sig_type_constraint($sig), $cv);
 
     Lexical::Sub->import($name => sub {
         my ($args) = \@_;
@@ -128,7 +130,7 @@ sub _register {
         confess "no variant of method '${name}' found for ", dump($args)
             unless $result;
 
-        goto $result;
+        goto $result->[1];
 
     });
 }
