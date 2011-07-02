@@ -1,0 +1,7 @@
+*META*
+Makefile*
+!Makefile.PL
+Sub.*
+!Sub.xs
+!Sub.pm
+*blib
